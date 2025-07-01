@@ -1,0 +1,6 @@
+// ==UserScript==
+// @name        Neptun PowerUP (NG)
+// @author      klevcsoo
+// @version     %%%VERSION%%%
+// @match       https://*.*neptun*.*/*
+// ==/UserScript==
