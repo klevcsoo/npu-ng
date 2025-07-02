@@ -1,0 +1,27 @@
+import type { Channel } from "@/pubsub";
+import { createChannel } from "@/pubsub/lib.ts";
+
+export function createPathnameChannel(): Channel<"pathname"> {
+    return createChannel((publish) => {
+        const pushState = window.history.pushState;
+        const replaceState = window.history.replaceState;
+
+        function onUrlChange() {
+            publish(window.location.pathname);
+        }
+
+        window.history.pushState = function (...args: Parameters<typeof pushState>) {
+            const result = pushState.apply(history, args);
+            onUrlChange();
+            return result;
+        };
+
+        window.history.replaceState = function (...args: Parameters<typeof pushState>) {
+            const result = replaceState.apply(history, args);
+            onUrlChange();
+            return result;
+        };
+
+        window.addEventListener("popstate", onUrlChange); // Back/forward buttons
+    });
+}
