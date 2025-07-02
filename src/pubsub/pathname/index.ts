@@ -17,3 +17,7 @@ export function pathnameDoesNotMatch(pathnameRegex: RegExp): ChannelValueConditi
         },
     };
 }
+
+export function isOnLoginPage(): ChannelValueCondition<"pathname"> {
+    return pathnameMatches(/login/g);
+}

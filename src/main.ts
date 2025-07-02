@@ -1,7 +1,8 @@
 import type { Addon } from "@/addons";
 import login2faAutofocus from "@/addons/login-2fa-autofocus.ts";
+import loginSavedUsers from "@/addons/login-saved-users.ts";
 
-const addons: Addon[] = [login2faAutofocus];
+const addons: Addon[] = [login2faAutofocus, loginSavedUsers];
 
 for (const addon of addons) {
     try {

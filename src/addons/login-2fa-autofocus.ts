@@ -1,13 +1,13 @@
 import type { Addon } from "@/addons/index.ts";
 import { when } from "@/pubsub";
-import { pathnameMatches } from "@/pubsub/pathname";
+import { isOnLoginPage } from "@/pubsub/pathname";
 import { elementVisibleInDOM } from "@/pubsub/dom";
 
 export default {
     name: "login-2fa-autofocus",
     initialise() {
         when(
-            pathnameMatches(/login/g),
+            isOnLoginPage(),
             elementVisibleInDOM(() => document.querySelector("neptun-two-factor-dialog-content")),
         ).execute(() => {
             document
