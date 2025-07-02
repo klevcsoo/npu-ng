@@ -2,6 +2,13 @@ import type { Addon } from "@/addons/index.ts";
 import { when } from "@/pubsub";
 import { pathnameDoesNotMatch, pathnameMatches } from "@/pubsub/pathname";
 
+function debugCubeElem(colour: string): string {
+    return `
+<div id="${colour}" style="background-color: #${colour}; width: 100px; height: 100px;">
+</div>
+    `;
+}
+
 export default {
     name: "debug-box",
     initialise() {
@@ -11,10 +18,7 @@ export default {
             .execute(() => {
                 document
                     .querySelector("app-root")!
-                    .insertAdjacentHTML(
-                        "beforebegin",
-                        `<div id="${colour}" style="background-color: #${colour}; width: 100px; height: 100px;"></div>`,
-                    );
+                    .insertAdjacentHTML("beforebegin", debugCubeElem(colour));
             })
             .otherwise(() => {
                 document.getElementById(colour)?.remove();
