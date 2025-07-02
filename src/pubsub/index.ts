@@ -1,7 +1,9 @@
 import { createPathnameChannel } from "@/pubsub/pathname/lib.ts";
+import { createDOMMutationChannel } from "@/pubsub/dom/lib.ts";
 
 export interface ChannelPublicationTypeMap {
     pathname: string;
+    domMutation: MutationRecord[];
 }
 
 export type ChannelName = keyof ChannelPublicationTypeMap;
@@ -18,6 +20,7 @@ export interface Channel<C extends ChannelName> {
 
 const channelMap: { [name in ChannelName]: Channel<name> } = {
     pathname: createPathnameChannel(),
+    domMutation: createDOMMutationChannel(),
 };
 
 export function when(...conditionList: ChannelValueCondition<keyof ChannelPublicationTypeMap>[]) {

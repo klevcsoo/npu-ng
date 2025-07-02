@@ -1,7 +1,7 @@
 import type { Addon } from "@/addons";
-import debugBox from "@/addons/debug-box.ts";
+import login2faAutofocus from "@/addons/login-2fa-autofocus.ts";
 
-const addons: Addon[] = [debugBox];
+const addons: Addon[] = [login2faAutofocus];
 
 for (const addon of addons) {
     try {
