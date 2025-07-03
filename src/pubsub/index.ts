@@ -33,7 +33,10 @@ export function when(...conditionList: ChannelValueCondition<keyof ChannelPublic
         {} as { [name in ConditionKey]: boolean },
     );
 
-    const handlers: { executors: VoidFunction[]; destroyers: VoidFunction[] } = {
+    const handlers: {
+        executors: ((forceReevaluate: VoidFunction) => void)[];
+        destroyers: VoidFunction[];
+    } = {
         executors: [],
         destroyers: [],
     };
@@ -42,8 +45,13 @@ export function when(...conditionList: ChannelValueCondition<keyof ChannelPublic
     const evaluateConditionMap = () => {
         const current = Object.values(conditionMap).every((v) => v);
 
+        const reevaluate = () => {
+            for (const f of handlers.destroyers) f();
+            for (const f of handlers.executors) f(reevaluate);
+        };
+
         if (!previous && current) {
-            for (const f of handlers.executors) f();
+            for (const f of handlers.executors) f(reevaluate);
         } else if (previous && !current) {
             for (const f of handlers.destroyers) f();
         }
@@ -60,7 +68,7 @@ export function when(...conditionList: ChannelValueCondition<keyof ChannelPublic
     }
 
     return {
-        execute(handler: VoidFunction) {
+        execute(handler: (forceReevaluate: VoidFunction) => void) {
             handlers.executors.push(handler);
             return this;
         },

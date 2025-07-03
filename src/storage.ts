@@ -4,6 +4,7 @@ interface StorageOperations {
     get(): string | undefined;
     get<T>(transformer: (value: string | undefined) => T): T;
     set<T>(value: T): void;
+    set<T>(transformer: (value: string | undefined) => T): void;
     delete(): void;
 }
 
@@ -34,9 +35,13 @@ function createStorageOperations(storage: Storage, keyOrIndex: string | number):
             if (!!transformer) return transformer(value);
             else return value;
         },
-        set(value) {
-            const v = typeof value === "object" ? JSON.stringify(value) : String(value);
-            storage.setItem(key, v);
+        set(valueOrTransformer) {
+            const value =
+                typeof valueOrTransformer === "function"
+                    ? (valueOrTransformer as Function)(storage.getItem(key) ?? undefined)
+                    : valueOrTransformer;
+            const parsed = typeof value === "object" ? JSON.stringify(value) : String(value);
+            storage.setItem(key, parsed);
         },
         delete() {
             storage.removeItem(key);

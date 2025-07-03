@@ -1,27 +1,35 @@
 import type { ChannelValueCondition } from "@/pubsub";
 
-export function elementVisibleInDOM<E extends Element>(
-    elementFunc: () => E | null,
+export function elementVisibleInDOM(
+    generator: () => JQuery<HTMLElement> | null | undefined,
     options?: CheckVisibilityOptions,
 ): ChannelValueCondition<"domMutation"> {
     return {
         channelName: "domMutation",
         evaluateCondition() {
-            const element = elementFunc();
-            return !!element && element.checkVisibility(options);
+            const elements = generator();
+            return (
+                !!elements &&
+                elements.length > 0 &&
+                elements.toArray().some((e) => e.checkVisibility(options))
+            );
         },
     };
 }
 
-export function elementNotVisibleInDom<E extends Element>(
-    elementFunc: () => E | null,
+export function elementNotVisibleInDom(
+    generator: () => JQuery<HTMLElement> | null | undefined,
     options?: CheckVisibilityOptions,
-) {
+): ChannelValueCondition<"domMutation"> {
     return {
         channelName: "domMutation",
         evaluateCondition() {
-            const element = elementFunc();
-            return !element || !element.checkVisibility(options);
+            const elements = generator();
+            return (
+                !elements ||
+                elements.length === 0 ||
+                elements.toArray().every((e) => !e.checkVisibility(options))
+            );
         },
     };
 }
