@@ -1,7 +1,7 @@
 import type { Channel } from "@/pubsub";
 import { createChannel } from "@/pubsub/lib.ts";
 
-export function createPathnameChannel(): Channel<"pathname"> {
+export function createPathnameChannel(): Channel<"Pathname"> {
     return createChannel((publish) => {
         const pushState = window.history.pushState;
         const replaceState = window.history.replaceState;
@@ -11,13 +11,13 @@ export function createPathnameChannel(): Channel<"pathname"> {
         }
 
         window.history.pushState = function (...args: Parameters<typeof pushState>) {
-            const result = pushState.apply(history, args);
+            const result = pushState.apply(window.history, args);
             onUrlChange();
             return result;
         };
 
         window.history.replaceState = function (...args: Parameters<typeof pushState>) {
-            const result = replaceState.apply(history, args);
+            const result = replaceState.apply(window.history, args);
             onUrlChange();
             return result;
         };

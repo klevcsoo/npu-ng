@@ -1,27 +1,27 @@
 import { type ChannelValueCondition } from "@/pubsub";
 
-export function pathnameMatches(pathnameRegex: RegExp): ChannelValueCondition<"pathname"> {
+export function pathnameMatches(pathnameRegex: RegExp): ChannelValueCondition<"Pathname"> {
     return {
-        channelName: "pathname",
+        channelName: "Pathname",
         evaluateCondition(pathname) {
             return !!pathname.match(pathnameRegex);
         },
     };
 }
 
-export function pathnameDoesNotMatch(pathnameRegex: RegExp): ChannelValueCondition<"pathname"> {
+export function pathnameDoesNotMatch(pathnameRegex: RegExp): ChannelValueCondition<"Pathname"> {
     return {
-        channelName: "pathname",
+        channelName: "Pathname",
         evaluateCondition(pathname) {
             return !pathname.match(pathnameRegex);
         },
     };
 }
 
-export function isOnLoginPage(): ChannelValueCondition<"pathname"> {
+export function isOnLoginPage(): ChannelValueCondition<"Pathname"> {
     return pathnameMatches(/^\/[^\/]*\/login(\/.*)?/);
 }
 
-export function isNotOnLoginPage(): ChannelValueCondition<"pathname"> {
+export function isNotOnLoginPage(): ChannelValueCondition<"Pathname"> {
     return pathnameDoesNotMatch(/^\/[^\/]*\/login(\/.*)?/);
 }

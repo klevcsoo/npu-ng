@@ -3,9 +3,9 @@ import type { ChannelValueCondition } from "@/pubsub";
 export function elementVisibleInDOM(
     generator: () => JQuery<HTMLElement> | null | undefined,
     options?: CheckVisibilityOptions,
-): ChannelValueCondition<"domMutation"> {
+): ChannelValueCondition<"DOMMutation"> {
     return {
-        channelName: "domMutation",
+        channelName: "DOMMutation",
         evaluateCondition() {
             const elements = generator();
             return (
@@ -20,9 +20,9 @@ export function elementVisibleInDOM(
 export function elementNotVisibleInDom(
     generator: () => JQuery<HTMLElement> | null | undefined,
     options?: CheckVisibilityOptions,
-): ChannelValueCondition<"domMutation"> {
+): ChannelValueCondition<"DOMMutation"> {
     return {
-        channelName: "domMutation",
+        channelName: "DOMMutation",
         evaluateCondition() {
             const elements = generator();
             return (

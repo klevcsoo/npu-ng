@@ -2,8 +2,8 @@ import { createPathnameChannel } from "@/pubsub/pathname/lib.ts";
 import { createDOMMutationChannel } from "@/pubsub/dom/lib.ts";
 
 export interface ChannelPublicationTypeMap {
-    pathname: string;
-    domMutation: MutationRecord[];
+    Pathname: string;
+    DOMMutation: MutationRecord[];
 }
 
 export type ChannelName = keyof ChannelPublicationTypeMap;
@@ -19,9 +19,19 @@ export interface Channel<C extends ChannelName> {
 }
 
 const channelMap: { [name in ChannelName]: Channel<name> } = {
-    pathname: createPathnameChannel(),
-    domMutation: createDOMMutationChannel(),
+    Pathname: createPathnameChannel(),
+    DOMMutation: createDOMMutationChannel(),
 };
+
+export function subscribeTo<C extends ChannelName>(
+    channel: C,
+    onPublish: (value: ChannelPublicationTypeMap[C]) => void,
+): VoidFunction {
+    channelMap[channel].on(onPublish);
+    return () => {
+        channelMap[channel].off(onPublish);
+    };
+}
 
 export function when(
     ...conditionList: (ChannelValueCondition<ChannelName> | ChannelValueCondition<ChannelName>[])[]
@@ -64,7 +74,7 @@ export function when(
 
     for (let i = 0; i < flatConditionList.length; i++) {
         const condition = flatConditionList[i];
-        channelMap[condition.channelName].on((value) => {
+        subscribeTo(condition.channelName, (value) => {
             conditionMap[`${condition.channelName}-${i}`] = condition.evaluateCondition(value);
             evaluateConditionMap();
         });

@@ -3,13 +3,13 @@ import { isNotOnLoginPage } from "@/pubsub/pathname";
 import { readNeptunCode } from "@/neptun.ts";
 
 export function isAuthenticated(): [
-    ChannelValueCondition<"pathname">,
-    ChannelValueCondition<"domMutation">,
+    ChannelValueCondition<"Pathname">,
+    ChannelValueCondition<"DOMMutation">,
 ] {
     return [
         isNotOnLoginPage(),
         {
-            channelName: "domMutation",
+            channelName: "DOMMutation",
             evaluateCondition() {
                 const neptuneCode = readNeptunCode();
                 return !!neptuneCode && neptuneCode.length > 0;
