@@ -19,5 +19,9 @@ export function pathnameDoesNotMatch(pathnameRegex: RegExp): ChannelValueConditi
 }
 
 export function isOnLoginPage(): ChannelValueCondition<"pathname"> {
-    return pathnameMatches(/login/g);
+    return pathnameMatches(/^\/[^\/]*\/login(\/.*)?/);
+}
+
+export function isNotOnLoginPage(): ChannelValueCondition<"pathname"> {
+    return pathnameDoesNotMatch(/^\/[^\/]*\/login(\/.*)?/);
 }

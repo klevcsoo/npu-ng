@@ -23,10 +23,13 @@ const channelMap: { [name in ChannelName]: Channel<name> } = {
     domMutation: createDOMMutationChannel(),
 };
 
-export function when(...conditionList: ChannelValueCondition<keyof ChannelPublicationTypeMap>[]) {
+export function when(
+    ...conditionList: (ChannelValueCondition<ChannelName> | ChannelValueCondition<ChannelName>[])[]
+) {
     type ConditionKey = `${ChannelName}-${number}`;
 
-    const conditionMap: { [name in ConditionKey]: boolean } = conditionList.reduce(
+    const flatConditionList = conditionList.flat();
+    const conditionMap: { [name in ConditionKey]: boolean } = flatConditionList.reduce(
         (previousValue, currentValue, currentIndex) => {
             return { ...previousValue, [`${currentValue.channelName}-${currentIndex}`]: false };
         },
@@ -59,8 +62,8 @@ export function when(...conditionList: ChannelValueCondition<keyof ChannelPublic
         previous = current;
     };
 
-    for (let i = 0; i < conditionList.length; i++) {
-        const condition = conditionList[i];
+    for (let i = 0; i < flatConditionList.length; i++) {
+        const condition = flatConditionList[i];
         channelMap[condition.channelName].on((value) => {
             conditionMap[`${condition.channelName}-${i}`] = condition.evaluateCondition(value);
             evaluateConditionMap();
