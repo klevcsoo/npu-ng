@@ -1,5 +1,9 @@
 const STORAGE_KEY_PREFIX = "npu-ng";
 
+interface StorageAccessOptions {
+    prefix?: string;
+}
+
 interface StorageOperations {
     get(): string | undefined;
     get<T>(transformer: (value: string | undefined) => T): T;
@@ -8,23 +12,35 @@ interface StorageOperations {
     delete(): void;
 }
 
-export function sessionStorage(key: string): StorageOperations;
-export function sessionStorage(index: number): StorageOperations;
-export function sessionStorage(keyOrIndex: string | number): StorageOperations {
-    return createStorageOperations(window.sessionStorage, keyOrIndex);
+export function sessionStorage(key: string, options?: StorageAccessOptions): StorageOperations;
+export function sessionStorage(index: number, options?: StorageAccessOptions): StorageOperations;
+export function sessionStorage(
+    keyOrIndex: string | number,
+    options?: StorageAccessOptions,
+): StorageOperations {
+    return createStorageOperations(window.sessionStorage, keyOrIndex, options);
 }
 
-export function localStorage(key: string): StorageOperations;
-export function localStorage(index: number): StorageOperations;
-export function localStorage(keyOrIndex: string | number): StorageOperations {
-    return createStorageOperations(window.localStorage, keyOrIndex);
+export function localStorage(key: string, options?: StorageAccessOptions): StorageOperations;
+export function localStorage(index: number, options?: StorageAccessOptions): StorageOperations;
+export function localStorage(
+    keyOrIndex: string | number,
+    options?: StorageAccessOptions,
+): StorageOperations {
+    return createStorageOperations(window.localStorage, keyOrIndex, options);
 }
 
-function createStorageOperations(storage: Storage, keyOrIndex: string | number): StorageOperations {
+function createStorageOperations(
+    storage: Storage,
+    keyOrIndex: string | number,
+    options?: StorageAccessOptions,
+): StorageOperations {
     const key =
         typeof keyOrIndex === "number"
             ? storage.key(keyOrIndex)
-            : `${STORAGE_KEY_PREFIX}.${keyOrIndex}`;
+            : options?.prefix !== undefined
+              ? `${options.prefix}${keyOrIndex}`
+              : `${STORAGE_KEY_PREFIX}.${keyOrIndex}`;
     if (!key) {
         storageError(`Invalid key or index for session storage: ${keyOrIndex}`);
     }
