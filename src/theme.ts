@@ -21,7 +21,6 @@ export function injectStyle(style: Record<string, Record<string, string>>): void
         });
         return out + `${selector}{${rules.join(";")}}`;
     }, "");
-    console.log(content);
 
     // noinspection HtmlDeprecatedAttribute
     $(`<style type="text/css">${content}</style>`).appendTo("head");
