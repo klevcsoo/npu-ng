@@ -9,7 +9,7 @@ importers:
   .:
     devDependencies:
       '@types/jquery':
-        specifier: ^3.5.32
+        specifier: 3.5.32
         version: 3.5.32
       '@types/node':
         specifier: ^24.0.10
@@ -17,9 +17,6 @@ importers:
       handlebars:
         specifier: ^4.7.8
         version: 4.7.8
-      jquery:
-        specifier: ^3.7.1
-        version: 3.7.1
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
@@ -317,9 +314,6 @@ packages:
     engines: {node: '>=0.4.7'}
     hasBin: true
 
-  jquery@3.7.1:
-    resolution: {integrity: sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==}
-
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
@@ -612,8 +606,6 @@ snapshots:
       wordwrap: 1.0.0
     optionalDependencies:
       uglify-js: 3.19.3
-
-  jquery@3.7.1: {}
 
   minimist@1.2.8: {}
 

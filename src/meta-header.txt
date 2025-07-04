@@ -3,4 +3,5 @@
 // @author      klevcsoo
 // @version     %%%VERSION%%%
 // @match       https://*.*neptun*.*/*
+// @require     https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js
 // ==/UserScript==
