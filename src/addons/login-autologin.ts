@@ -2,7 +2,7 @@ import type { Addon } from "@/addons/index.ts";
 import { when } from "@/pubsub";
 import { isOnLoginPage } from "@/pubsub/pathname";
 import { elementVisibleInDOM } from "@/pubsub/dom";
-import { neptunTheme } from "@/theme.ts";
+import { injectStyle, neptunTheme } from "@/theme.ts";
 import { ELEMENT_ID__USER_SELECT } from "@/addons/login-saved-users.ts";
 import { dispatchNativeEventNG } from "@/angular.ts";
 
@@ -12,6 +12,29 @@ export default function loginAutologin(): Addon {
     const loginForm = () => $("neptun-login-form form");
     const loginButton = () => $("neptun-login-form #login-button");
     const userSelect = () => $(`#${ELEMENT_ID__USER_SELECT}`);
+
+    injectStyle({
+        [`#${ELEMENT_ID__CANCEL_BUTTON}`]: {
+            width: "100%",
+            height: "44px",
+            cursor: "pointer",
+            padding: "1rem",
+            "margin-top": "12px",
+            color: neptunTheme.colours.foreground.default,
+            "background-color": neptunTheme.colours.background.elevated,
+            border: "none",
+            "border-radius": neptunTheme.radius.medium,
+            display: "flex",
+            "flex-direction": "row",
+            "align-items": "center",
+            "justify-content": "center",
+            gap: "0.5rem",
+            "font-size": "16px",
+        },
+        [`#${ELEMENT_ID__CANCEL_BUTTON}:hover`]: {
+            background: neptunTheme.colours.background.elevatedHover,
+        },
+    });
 
     const autologinTimeoutMs = 3000;
 
@@ -27,27 +50,11 @@ export default function loginAutologin(): Addon {
 
                     const cancelButton = $(
                         `<button id='${ELEMENT_ID__CANCEL_BUTTON}'>Megszakítás</button>`,
-                    )
-                        .css("width", "100%")
-                        .css("height", "44px")
-                        .css("cursor", "pointer")
-                        .css("padding", "1rem")
-                        .css("margin-top", "12px")
-                        .css("color", neptunTheme.colours.foreground.default)
-                        .css("background-color", neptunTheme.colours.background.elevated)
-                        .css("border", "none")
-                        .css("border-radius", neptunTheme.radius.medium)
-                        .css("display", "flex")
-                        .css("flex-direction", "row")
-                        .css("align-items", "center")
-                        .css("justify-content", "center")
-                        .css("gap", "0.5rem")
-                        .css("font-size", "16px")
-                        .prepend(
-                            $('<i class="icon-x"/>')
-                                .css("font-size", "24px")
-                                .css("color", neptunTheme.colours.foreground.default),
-                        );
+                    ).prepend(
+                        $('<i class="icon-x"/>')
+                            .css("font-size", "24px")
+                            .css("color", neptunTheme.colours.foreground.default),
+                    );
 
                     const commitAutoLogin = () => {
                         currentAnimationFrame = undefined;
@@ -99,6 +106,8 @@ export default function loginAutologin(): Addon {
                     if (!!userSelectChangeCallback) {
                         userSelect().off("change", userSelectChangeCallback);
                     }
+
+                    $(`#${ELEMENT_ID__CANCEL_BUTTON}`).remove();
                 });
         },
     };

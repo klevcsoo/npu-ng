@@ -3,7 +3,7 @@ import { when } from "@/pubsub";
 import { isOnLoginPage } from "@/pubsub/pathname";
 import { elementVisibleInDOM } from "@/pubsub/dom";
 import { localStorage } from "@/storage.ts";
-import { neptunTheme } from "@/theme.ts";
+import { injectStyle, neptunTheme } from "@/theme.ts";
 import { dispatchNativeEventNG } from "@/angular.ts";
 
 export const STORAGE_KEY__SAVED_USERS = "saved-users";
@@ -17,6 +17,33 @@ export default function loginSavedUsers(): Addon {
     const usernameInput = () => $("neptun-login-form #userName");
     const passwordInput = () => $("neptun-login-form neptun-form-password input[type=password]");
     const loginButton2FA = () => $("neptun-two-factor-dialog-content #login-button");
+
+    injectStyle({
+        [`#${ELEMENT_ID__USER_SELECT}`]: {
+            width: "100%",
+            height: "auto",
+            cursor: "pointer",
+            "padding-left": "1rem",
+            color: neptunTheme.colours.foreground.default,
+            "background-color": neptunTheme.colours.background.elevated,
+            border: "none",
+            "border-right": "1rem solid transparent",
+            "border-radius": neptunTheme.radius.medium,
+        },
+        [`#${ELEMENT_ID__DELETE_USER_BUTTON}`]: {
+            "min-width": "48px",
+            height: "auto",
+            cursor: "pointer",
+            padding: "0.5rem",
+            color: neptunTheme.colours.foreground.default,
+            "background-color": neptunTheme.colours.background.elevated,
+            border: "none",
+            "border-radius": neptunTheme.radius.medium,
+        },
+        [`#${ELEMENT_ID__DELETE_USER_BUTTON}:hover`]: {
+            background: neptunTheme.colours.background.elevatedHover,
+        },
+    });
 
     return {
         name: "login-saved-users",
@@ -36,18 +63,22 @@ export default function loginSavedUsers(): Addon {
                     });
 
                     const userSelect = (() => {
-                        const selectElement = $(`<select id='${ELEMENT_ID__USER_SELECT}'></select>`)
-                            .css("width", "100%")
-                            .css("height", "auto")
-                            .css("cursor", "pointer")
-                            .css("padding-left", "1rem")
-                            .css("color", neptunTheme.colours.foreground.default)
-                            .css("background-color", neptunTheme.colours.background.elevated)
-                            .css("border", "none")
-                            .css("border-right", "1rem solid transparent")
-                            .css("border-radius", neptunTheme.radius.medium)
-                            .append($("<option disabled value='-'>-</option>"))
-                            .append($("<option value='__new__'>Új felhasználó</option>"));
+                        const selectElement = $(
+                            `<select id='${ELEMENT_ID__USER_SELECT}'></select>`,
+                        ).on("change", () => {
+                            const username = String(selectElement.val());
+
+                            if (username === "__new__") {
+                                usernameInput().val("");
+                                passwordInput().val("");
+                            } else if (!!savedUsers[username]) {
+                                usernameInput().val(username);
+                                passwordInput().val(savedUsers[username]);
+                            }
+
+                            dispatchNativeEventNG(usernameInput(), "input", "change", "blur");
+                            dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
+                        });
 
                         if (Object.keys(savedUsers).length > 0) {
                             for (const username in savedUsers) {
@@ -76,43 +107,18 @@ export default function loginSavedUsers(): Addon {
                             );
                         }
 
-                        selectElement.on("change", () => {
-                            const username = String(selectElement.val());
-
-                            if (username === "__new__") {
-                                usernameInput().val("");
-                                passwordInput().val("");
-                            } else if (!!savedUsers[username]) {
-                                usernameInput().val(username);
-                                passwordInput().val(savedUsers[username]);
-                            }
-
-                            dispatchNativeEventNG(usernameInput(), "input", "change", "blur");
-                            dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
-                        });
-
                         return selectElement;
                     })();
 
-                    const userDeleteButton = (() => {
-                        const buttonElement = $(
-                            `<button id="${ELEMENT_ID__DELETE_USER_BUTTON}"></button>`,
+                    const userDeleteButton = $(
+                        `<button id="${ELEMENT_ID__DELETE_USER_BUTTON}"></button>`,
+                    )
+                        .append(
+                            $('<i class="icon-trash"/>')
+                                .css("font-size", "18px")
+                                .css("color", neptunTheme.colours.foreground.default),
                         )
-                            .css("min-width", "48px")
-                            .css("height", "auto")
-                            .css("cursor", "pointer")
-                            .css("padding", "0.5rem")
-                            .css("color", neptunTheme.colours.foreground.default)
-                            .css("background-color", neptunTheme.colours.background.elevated)
-                            .css("border", "none")
-                            .css("border-radius", neptunTheme.radius.medium)
-                            .append(
-                                $('<i class="icon-trash"/>')
-                                    .css("font-size", "18px")
-                                    .css("color", neptunTheme.colours.foreground.default),
-                            );
-
-                        buttonElement.on("click", () => {
+                        .on("click", () => {
                             const activeUsername = String(userSelect.val());
 
                             const msg =
@@ -134,9 +140,6 @@ export default function loginSavedUsers(): Addon {
                                 forceReevaluate();
                             }
                         });
-
-                        return buttonElement;
-                    })();
 
                     languageDropdown()
                         .css("display", "flex")

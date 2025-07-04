@@ -3,6 +3,7 @@ export const neptunTheme = {
         background: {
             default: "#ffffff",
             elevated: "#f2f3fb",
+            elevatedHover: "#e6eaf9",
         },
         foreground: {
             darkest: "#222222",
