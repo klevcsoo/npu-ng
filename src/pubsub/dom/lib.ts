@@ -1,5 +1,5 @@
-import type { Channel } from "@/pubsub";
 import { createChannel } from "@/pubsub/lib.ts";
+import type { Channel } from "@/pubsub/types.ts";
 
 export function createDOMMutationChannel(): Channel<"DOMMutation"> {
     return createChannel((publish) => {

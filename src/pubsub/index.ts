@@ -1,26 +1,18 @@
 import { createPathnameChannel } from "@/pubsub/pathname/lib.ts";
 import { createDOMMutationChannel } from "@/pubsub/dom/lib.ts";
-
-export interface ChannelPublicationTypeMap {
-    Pathname: string;
-    DOMMutation: MutationRecord[];
-}
-
-export type ChannelName = keyof ChannelPublicationTypeMap;
-
-export interface ChannelValueCondition<C extends ChannelName> {
-    channelName: C;
-    evaluateCondition(value: ChannelPublicationTypeMap[C]): boolean;
-}
-
-export interface Channel<C extends ChannelName> {
-    on(callback: (value: ChannelPublicationTypeMap[C]) => void): void;
-    off(callback: (value: ChannelPublicationTypeMap[C]) => void): void;
-}
+import { createLocalStorageChannel, createSessionStorageChannel } from "@/pubsub/storage/lib.ts";
+import type {
+    Channel,
+    ChannelName,
+    ChannelPublicationTypeMap,
+    ChannelValueCondition,
+} from "@/pubsub/types.ts";
 
 const channelMap: { [name in ChannelName]: Channel<name> } = {
     Pathname: createPathnameChannel(),
     DOMMutation: createDOMMutationChannel(),
+    SessionStorage: createSessionStorageChannel(),
+    LocalStorage: createLocalStorageChannel(),
 };
 
 export function subscribeTo<C extends ChannelName>(

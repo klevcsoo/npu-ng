@@ -1,4 +1,4 @@
-import type { Channel, ChannelName, ChannelPublicationTypeMap } from "@/pubsub/index.ts";
+import type { Channel, ChannelName, ChannelPublicationTypeMap } from "@/pubsub/types.ts";
 
 export function createChannel<C extends ChannelName>(
     handler: (publish: (value: ChannelPublicationTypeMap[C]) => void) => void,

@@ -1,4 +1,4 @@
-import { type ChannelValueCondition } from "@/pubsub";
+import type { ChannelValueCondition } from "@/pubsub/types.ts";
 
 export function pathnameMatches(pathnameRegex: RegExp): ChannelValueCondition<"Pathname"> {
     return {

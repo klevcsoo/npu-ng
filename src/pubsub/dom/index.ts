@@ -1,4 +1,4 @@
-import type { ChannelValueCondition } from "@/pubsub";
+import type { ChannelValueCondition } from "@/pubsub/types.ts";
 
 export function elementVisibleInDOM(
     generator: () => JQuery<HTMLElement> | null | undefined,
