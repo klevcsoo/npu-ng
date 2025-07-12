@@ -1,4 +1,4 @@
-import type { Addon } from "@/addons";
+import type { Addon } from "@/addons/types.ts";
 import login2faAutofocus from "@/addons/login-2fa-autofocus.ts";
 import loginSavedUsers from "@/addons/login-saved-users.ts";
 import loginAutologin from "@/addons/login-autologin.ts";

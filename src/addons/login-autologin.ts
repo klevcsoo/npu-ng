@@ -1,4 +1,4 @@
-import type { Addon } from "@/addons/index.ts";
+import type { Addon } from "@/addons/types.ts";
 import { when } from "@/pubsub";
 import { isOnLoginPage } from "@/pubsub/pathname";
 import { elementVisibleInDOM } from "@/pubsub/dom";

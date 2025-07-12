@@ -1,4 +1,4 @@
-import type { Addon } from "@/addons/index.ts";
+import type { Addon } from "@/addons/types.ts";
 import { injectStyle } from "@/theme.ts";
 
 export default function removeNotificationBar(): Addon {
