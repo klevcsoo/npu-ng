@@ -102,7 +102,7 @@ export default function loginSavedUsers(): Addon {
                         } else {
                             selectElement.prepend(
                                 $(
-                                    "<option disabled value='-'>Nincs lementett felhasználó</option>",
+                                    "<option disabled selected value='-'>Nincs lementett felhasználó</option>",
                                 ),
                             );
                         }
@@ -135,7 +135,10 @@ export default function loginSavedUsers(): Addon {
                                 );
 
                                 usernameInput().val("");
+                                dispatchNativeEventNG(usernameInput(), "input", "change", "blur");
+
                                 passwordInput().val("");
+                                dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
 
                                 forceReevaluate();
                             }
@@ -146,8 +149,11 @@ export default function loginSavedUsers(): Addon {
                         .css("flex-direction", "row")
                         .css("gap", "1rem")
                         .css("align-items", "stretch")
-                        .append(userSelect)
-                        .append(userDeleteButton);
+                        .append(userSelect);
+
+                    if (Object.keys(savedUsers).length > 0) {
+                        languageDropdown().append(userDeleteButton);
+                    }
                 })
                 .otherwise(() => {
                     $(`#${ELEMENT_ID__USER_SELECT}`).remove();

@@ -9,9 +9,9 @@ import { dispatchNativeEventNG } from "@/angular.ts";
 export const ELEMENT_ID__CANCEL_BUTTON = "npu-ng-cancel-autologin";
 
 export default function loginAutologin(): Addon {
-    const loginForm = () => $("neptun-login-form form");
-    const loginButton = () => $("neptun-login-form #login-button");
-    const userSelect = () => $(`#${ELEMENT_ID__USER_SELECT}`);
+    const loginForm = () => $<HTMLFormElement>("neptun-login-form form");
+    const loginButton = () => $<HTMLFormElement>("neptun-login-form #login-button");
+    const userSelect = () => $<HTMLSelectElement>(`#${ELEMENT_ID__USER_SELECT}`);
 
     injectStyle({
         [`#${ELEMENT_ID__CANCEL_BUTTON}`]: {
@@ -46,6 +46,9 @@ export default function loginAutologin(): Addon {
 
             when(isOnLoginPage(), elementVisibleInDOM(loginButton), elementVisibleInDOM(userSelect))
                 .execute(() => {
+                    const selectedUser = userSelect().val();
+                    if (!selectedUser || selectedUser === "-") return;
+
                     const loginButtonLabel = loginButton().find("span.neptun-button__label");
 
                     const cancelButton = $(
