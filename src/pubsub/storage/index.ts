@@ -9,7 +9,10 @@ export function entryPresentInStorage<
 ): ChannelValueCondition<C> {
     return {
         channelName: key.pubSubChannelName,
-        evaluateCondition(): boolean {
+        needsEvaluation(payload) {
+            return payload.operation === "clear" || payload.key === key.keyName;
+        },
+        evaluateCondition() {
             const value = key.get();
             return (
                 !!value &&
@@ -28,11 +31,29 @@ export function entryNotPresentInStorage<
 ): ChannelValueCondition<C> {
     return {
         channelName: key.pubSubChannelName,
-        evaluateCondition(): boolean {
+        needsEvaluation(payload) {
+            return payload.operation === "clear" || payload.key === key.keyName;
+        },
+        evaluateCondition() {
             const value = key.get();
             return (
                 !value || options?.orMatches?.test(value) || !options?.orDoesNotMatch?.test(value)
             );
+        },
+    };
+}
+
+export function entryChangesInStorage<
+    C extends Extract<ChannelName, "SessionStorage" | "LocalStorage">,
+>(key: StorageKey<C>): ChannelValueCondition<C> {
+    return {
+        channelName: key.pubSubChannelName,
+        requiresContextReloadOnTruthfulEvaluation: true,
+        needsEvaluation(payload) {
+            return payload.operation === "clear" || payload.key === key.keyName;
+        },
+        evaluateCondition() {
+            return true;
         },
     };
 }

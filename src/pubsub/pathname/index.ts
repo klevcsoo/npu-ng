@@ -3,6 +3,9 @@ import type { ChannelValueCondition } from "@/pubsub/types.ts";
 export function pathnameMatches(pathnameRegex: RegExp): ChannelValueCondition<"Pathname"> {
     return {
         channelName: "Pathname",
+        needsEvaluation() {
+            return true;
+        },
         evaluateCondition(pathname) {
             return !!pathname.match(pathnameRegex);
         },
@@ -12,6 +15,9 @@ export function pathnameMatches(pathnameRegex: RegExp): ChannelValueCondition<"P
 export function pathnameDoesNotMatch(pathnameRegex: RegExp): ChannelValueCondition<"Pathname"> {
     return {
         channelName: "Pathname",
+        needsEvaluation() {
+            return true;
+        },
         evaluateCondition(pathname) {
             return !pathname.match(pathnameRegex);
         },

@@ -5,8 +5,7 @@ import { elementVisibleInDOM } from "@/pubsub/dom";
 import { injectStyle, neptunTheme } from "@/theme.ts";
 import { ELEMENT_ID__USER_SELECT } from "@/addons/login-saved-users.ts";
 import { dispatchNativeEventNG } from "@/angular.ts";
-import { sessionStorage } from "@/storage.ts";
-import { STORAGE_KEY__CLEAN_LOGOUT } from "@/addons/clean-logout.ts";
+import { lastSessionWasInterrupted } from "@/pubsub/auth";
 
 export const ELEMENT_ID__CANCEL_BUTTON = "npu-ng-cancel-autologin";
 
@@ -46,17 +45,15 @@ export default function loginAutologin(): Addon {
             let currentAnimationFrame: number | undefined = undefined;
             let userSelectChangeCallback: VoidFunction | undefined = undefined;
 
-            when(isOnLoginPage(), elementVisibleInDOM(loginButton), elementVisibleInDOM(userSelect))
+            when(
+                isOnLoginPage(),
+                elementVisibleInDOM(loginButton),
+                elementVisibleInDOM(userSelect),
+                lastSessionWasInterrupted(),
+            )
                 .execute(() => {
-                    const hasBeenCleanlyLoggedOut =
-                        sessionStorage(STORAGE_KEY__CLEAN_LOGOUT).get() === String(true);
-                    if (hasBeenCleanlyLoggedOut) {
-                        sessionStorage(STORAGE_KEY__CLEAN_LOGOUT).delete();
-                        return;
-                    }
-
                     const selectedUser = userSelect().val();
-                    if (!selectedUser || selectedUser === "-") return;
+                    if (!selectedUser || ["-", "__new__"].includes(String(selectedUser))) return;
 
                     const loginButtonLabel = loginButton().find("span.neptun-button__label");
 

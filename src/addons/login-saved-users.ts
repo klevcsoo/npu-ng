@@ -2,12 +2,10 @@ import type { Addon } from "@/addons/types.ts";
 import { when } from "@/pubsub";
 import { isOnLoginPage } from "@/pubsub/pathname";
 import { elementVisibleInDOM } from "@/pubsub/dom";
-import { localStorage } from "@/storage.ts";
+import { localStorage, storageKeys } from "@/storage.ts";
 import { injectStyle, neptunTheme } from "@/theme.ts";
 import { dispatchNativeEventNG } from "@/angular.ts";
-
-export const STORAGE_KEY__SAVED_USERS = "saved-users";
-export const STORAGE_KEY__LAST_LOGIN_USERNAME = "last-login-username";
+import { entryChangesInStorage } from "@/pubsub/storage";
 
 export const ELEMENT_ID__USER_SELECT = "npu-ng-saved-users";
 export const ELEMENT_ID__DELETE_USER_BUTTON = "npu-ng-delete-user";
@@ -53,42 +51,36 @@ export default function loginSavedUsers(): Addon {
                 elementVisibleInDOM(languageDropdown),
                 elementVisibleInDOM(usernameInput),
                 elementVisibleInDOM(passwordInput),
+                entryChangesInStorage(localStorage(storageKeys.localStorage.savedUsersJSON)),
             )
-                .execute((forceReevaluate) => {
-                    const savedUsers = localStorage(STORAGE_KEY__SAVED_USERS).get<
+                .execute(() => {
+                    const savedUsers = localStorage(storageKeys.localStorage.savedUsersJSON).get<
                         Record<string, string>
                     >((value) => {
                         if (!value) return {};
                         return JSON.parse(value) as Record<string, string>;
                     });
+                    console.log(savedUsers);
 
                     const userSelect = (() => {
                         const selectElement = $(
                             `<select id='${ELEMENT_ID__USER_SELECT}'></select>`,
-                        ).on("change", () => {
-                            const username = String(selectElement.val());
-
-                            if (username === "__new__") {
-                                usernameInput().val("");
-                                passwordInput().val("");
-                            } else if (!!savedUsers[username]) {
-                                usernameInput().val(username);
-                                passwordInput().val(savedUsers[username]);
-                            }
-
-                            dispatchNativeEventNG(usernameInput(), "input", "change", "blur");
-                            dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
-                        });
+                        );
 
                         if (Object.keys(savedUsers).length > 0) {
                             for (const username in savedUsers) {
-                                selectElement.prepend(
-                                    $(`<option id='${username}'>${username}</option>`),
+                                selectElement.append(
+                                    $(`<option value='${username}'>${username}</option>`),
                                 );
                             }
+                            selectElement
+                                .append($($(`<option disabled value='-'>-</option>`)))
+                                .append(
+                                    $(`<option selected value='__new__'>Más felhasználó</option>`),
+                                );
 
                             const lastLoginUsername = localStorage(
-                                STORAGE_KEY__LAST_LOGIN_USERNAME,
+                                storageKeys.localStorage.lastLoginUsername,
                             ).get();
                             if (lastLoginUsername && !!savedUsers[lastLoginUsername]) {
                                 selectElement.val(lastLoginUsername);
@@ -100,7 +92,7 @@ export default function loginSavedUsers(): Addon {
                                 dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
                             }
                         } else {
-                            selectElement.prepend(
+                            selectElement.append(
                                 $(
                                     "<option disabled selected value='-'>Nincs lementett felhasználó</option>",
                                 ),
@@ -112,37 +104,52 @@ export default function loginSavedUsers(): Addon {
 
                     const userDeleteButton = $(
                         `<button id="${ELEMENT_ID__DELETE_USER_BUTTON}"></button>`,
-                    )
-                        .append(
-                            $('<i class="icon-trash"/>')
-                                .css("font-size", "18px")
-                                .css("color", neptunTheme.colours.foreground.default),
-                        )
-                        .on("click", () => {
-                            const activeUsername = String(userSelect.val());
+                    ).append(
+                        $('<i class="icon-trash"/>')
+                            .css("font-size", "18px")
+                            .css("color", neptunTheme.colours.foreground.default),
+                    );
 
-                            const msg =
-                                `Biztos, hogy törölni szertnéd ${activeUsername} ` +
-                                "felhasználót a mentettek közül?";
+                    userSelect.on("change", () => {
+                        const username = String(userSelect.val());
 
-                            if (confirm(msg)) {
-                                localStorage(STORAGE_KEY__SAVED_USERS).set<Record<string, string>>(
-                                    (value) => {
-                                        const parsed = JSON.parse(value ?? "{}");
-                                        delete parsed[activeUsername];
-                                        return parsed;
-                                    },
-                                );
+                        if (username === "__new__") {
+                            usernameInput().val("");
+                            passwordInput().val("");
+                            userDeleteButton.remove();
+                        } else if (!!savedUsers[username]) {
+                            usernameInput().val(username);
+                            passwordInput().val(savedUsers[username]);
+                            userDeleteButton.appendTo(languageDropdown());
+                        }
 
-                                usernameInput().val("");
-                                dispatchNativeEventNG(usernameInput(), "input", "change", "blur");
+                        dispatchNativeEventNG(usernameInput(), "input", "change", "blur");
+                        dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
+                    });
 
-                                passwordInput().val("");
-                                dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
+                    userDeleteButton.on("click", () => {
+                        const activeUsername = String(userSelect.val());
 
-                                forceReevaluate();
-                            }
-                        });
+                        const msg =
+                            `Biztos, hogy törölni szertnéd ${activeUsername} ` +
+                            "felhasználót a mentettek közül?";
+
+                        if (confirm(msg)) {
+                            usernameInput().val("");
+                            dispatchNativeEventNG(usernameInput(), "input", "change", "blur");
+
+                            passwordInput().val("");
+                            dispatchNativeEventNG(passwordInput(), "input", "change", "blur");
+
+                            localStorage(storageKeys.localStorage.savedUsersJSON).set<
+                                Record<string, string>
+                            >((value) => {
+                                const parsed = JSON.parse(value ?? "{}");
+                                delete parsed[activeUsername];
+                                return parsed;
+                            });
+                        }
+                    });
 
                     languageDropdown()
                         .css("display", "flex")
@@ -151,11 +158,12 @@ export default function loginSavedUsers(): Addon {
                         .css("align-items", "stretch")
                         .append(userSelect);
 
-                    if (Object.keys(savedUsers).length > 0) {
+                    if (!!savedUsers[String(userSelect.val())]) {
                         languageDropdown().append(userDeleteButton);
                     }
                 })
                 .otherwise(() => {
+                    console.log("removing");
                     $(`#${ELEMENT_ID__USER_SELECT}`).remove();
                     $(`#${ELEMENT_ID__DELETE_USER_BUTTON}`).remove();
                 });
@@ -166,21 +174,25 @@ export default function loginSavedUsers(): Addon {
                     "egy kattintással be tudj lépni erről a számítógépről?";
                 const activeUsername = String(usernameInput().val());
 
-                const usernameAlreadySaved = localStorage(STORAGE_KEY__SAVED_USERS).get((value) => {
+                const usernameAlreadySaved = localStorage(
+                    storageKeys.localStorage.savedUsersJSON,
+                ).get((value) => {
                     if (!value) return false;
                     const parsed = JSON.parse(value) as Record<string, string>;
                     return !!parsed[activeUsername];
                 });
 
                 if (!usernameAlreadySaved && confirm(msg)) {
-                    localStorage(STORAGE_KEY__SAVED_USERS).set<Record<string, string>>((value) => {
+                    localStorage(storageKeys.localStorage.savedUsersJSON).set<
+                        Record<string, string>
+                    >((value) => {
                         const parsed = JSON.parse(value ?? "{}");
                         parsed[activeUsername] = String(passwordInput().val());
                         return parsed;
                     });
                 }
 
-                localStorage(STORAGE_KEY__LAST_LOGIN_USERNAME).set(activeUsername);
+                localStorage(storageKeys.localStorage.lastLoginUsername).set(activeUsername);
             };
 
             when(isOnLoginPage(), elementVisibleInDOM(loginButton2FA))

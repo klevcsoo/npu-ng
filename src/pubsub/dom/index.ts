@@ -6,6 +6,9 @@ export function elementVisibleInDOM(
 ): ChannelValueCondition<"DOMMutation"> {
     return {
         channelName: "DOMMutation",
+        needsEvaluation() {
+            return true;
+        },
         evaluateCondition() {
             const elements = generator();
             return (
@@ -23,6 +26,9 @@ export function elementNotVisibleInDom(
 ): ChannelValueCondition<"DOMMutation"> {
     return {
         channelName: "DOMMutation",
+        needsEvaluation() {
+            return true;
+        },
         evaluateCondition() {
             const elements = generator();
             return (

@@ -4,6 +4,7 @@ import loginSavedUsers from "@/addons/login-saved-users.ts";
 import loginAutologin from "@/addons/login-autologin.ts";
 import removeNotificationBar from "@/addons/remove-notification-bar.ts";
 import cleanLogout from "@/addons/clean-logout.ts";
+import workspacePersistence from "@/addons/workspace-persistence.ts";
 
 const addons: Addon[] = [
     cleanLogout(),
@@ -11,6 +12,7 @@ const addons: Addon[] = [
     loginAutologin(),
     loginSavedUsers(),
     removeNotificationBar(),
+    workspacePersistence(),
 ];
 
 for (const addon of addons) {
