@@ -1,3 +1,5 @@
+import type { ChannelName } from "@/pubsub/types.ts";
+
 const STORAGE_KEY_PREFIX = "npu-ng";
 
 interface StorageAccessOptions {
@@ -12,22 +14,41 @@ interface StorageOperations {
     delete(): void;
 }
 
-export function sessionStorage(key: string, options?: StorageAccessOptions): StorageOperations;
-export function sessionStorage(index: number, options?: StorageAccessOptions): StorageOperations;
+export interface StorageKey<C extends Extract<ChannelName, "LocalStorage" | "SessionStorage">>
+    extends StorageOperations {
+    pubSubChannelName: C;
+}
+
+export function sessionStorage(
+    key: string,
+    options?: StorageAccessOptions,
+): StorageKey<"SessionStorage">;
+export function sessionStorage(
+    index: number,
+    options?: StorageAccessOptions,
+): StorageKey<"SessionStorage">;
 export function sessionStorage(
     keyOrIndex: string | number,
     options?: StorageAccessOptions,
-): StorageOperations {
-    return createStorageOperations(window.sessionStorage, keyOrIndex, options);
+): StorageKey<"SessionStorage"> {
+    const ops = createStorageOperations(window.sessionStorage, keyOrIndex, options);
+    return { pubSubChannelName: "SessionStorage", ...ops };
 }
 
-export function localStorage(key: string, options?: StorageAccessOptions): StorageOperations;
-export function localStorage(index: number, options?: StorageAccessOptions): StorageOperations;
+export function localStorage(
+    key: string,
+    options?: StorageAccessOptions,
+): StorageKey<"LocalStorage">;
+export function localStorage(
+    index: number,
+    options?: StorageAccessOptions,
+): StorageKey<"LocalStorage">;
 export function localStorage(
     keyOrIndex: string | number,
     options?: StorageAccessOptions,
-): StorageOperations {
-    return createStorageOperations(window.localStorage, keyOrIndex, options);
+): StorageKey<"LocalStorage"> {
+    const ops = createStorageOperations(window.localStorage, keyOrIndex, options);
+    return { pubSubChannelName: "LocalStorage", ...ops };
 }
 
 function createStorageOperations(
@@ -45,24 +66,28 @@ function createStorageOperations(
         storageError(`Invalid key or index for session storage: ${keyOrIndex}`);
     }
 
-    return {
-        get<T>(transformer?: (value: string | undefined) => T) {
-            const value = storage.getItem(key) ?? undefined;
-            if (!!transformer) return transformer(value);
-            else return value;
-        },
-        set(valueOrTransformer) {
-            const value =
-                typeof valueOrTransformer === "function"
-                    ? (valueOrTransformer as Function)(storage.getItem(key) ?? undefined)
-                    : valueOrTransformer;
-            const parsed = typeof value === "object" ? JSON.stringify(value) : String(value);
-            storage.setItem(key, parsed);
-        },
-        delete() {
-            storage.removeItem(key);
-        },
-    };
+    try {
+        return {
+            get<T>(transformer?: (value: string | undefined) => T) {
+                const value = storage.getItem(key) ?? undefined;
+                if (!!transformer) return transformer(value);
+                else return value;
+            },
+            set(valueOrTransformer) {
+                const value =
+                    typeof valueOrTransformer === "function"
+                        ? (valueOrTransformer as Function)(storage.getItem(key) ?? undefined)
+                        : valueOrTransformer;
+                const parsed = typeof value === "object" ? JSON.stringify(value) : String(value);
+                storage.setItem(key, parsed);
+            },
+            delete() {
+                storage.removeItem(key);
+            },
+        };
+    } catch (e) {
+        storageError(String(e));
+    }
 }
 
 function storageError(message?: string): never {

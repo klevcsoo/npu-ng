@@ -1,6 +1,7 @@
-import { isNotOnLoginPage } from "@/pubsub/pathname";
 import type { ChannelValueCondition } from "@/pubsub/types.ts";
-import { matchesInSessionStorage, presentInSessionStorage } from "@/pubsub/storage";
+import { isNotOnLoginPage } from "@/pubsub/pathname";
+import { entryNotPresentInStorage, entryPresentInStorage } from "@/pubsub/storage";
+import { sessionStorage } from "@/storage.ts";
 
 export function isAuthenticated(): [
     ChannelValueCondition<"Pathname">,
@@ -9,7 +10,9 @@ export function isAuthenticated(): [
 ] {
     return [
         isNotOnLoginPage(),
-        presentInSessionStorage("access_token"),
-        matchesInSessionStorage("apm_session_id", /^((?!anonymous).)*$/),
+        entryPresentInStorage(sessionStorage("access_token", { prefix: "" })),
+        entryNotPresentInStorage(sessionStorage("amp_session_id", { prefix: "" }), {
+            orMatches: /^anonymous$/,
+        }),
     ];
 }

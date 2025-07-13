@@ -3,8 +3,10 @@ import login2faAutofocus from "@/addons/login-2fa-autofocus.ts";
 import loginSavedUsers from "@/addons/login-saved-users.ts";
 import loginAutologin from "@/addons/login-autologin.ts";
 import removeNotificationBar from "@/addons/remove-notification-bar.ts";
+import cleanLogout from "@/addons/clean-logout.ts";
 
 const addons: Addon[] = [
+    cleanLogout(),
     login2faAutofocus(),
     loginAutologin(),
     loginSavedUsers(),
